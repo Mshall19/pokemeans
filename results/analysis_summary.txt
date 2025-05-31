@@ -1,0 +1,26 @@
+Resumen del análisis de clustering con K-Means:
+- Número de grupos: 3
+- Columnas utilizadas: HP, Attack, Defense, Speed
+
+Observaciones por cluster:
+
+Cluster 0: Pokémon rápidos y ofensivos
+  - Promedio HP: 54.07
+  - Promedio Attack: 56.26
+  - Promedio Defense: 54.41
+  - Promedio Speed: 57.72
+  - Tamaño del cluster: 160
+
+Cluster 1: Pokémon defensivos y lentos
+  - Promedio HP: 86.52
+  - Promedio Attack: 107.22
+  - Promedio Defense: 84.18
+  - Promedio Speed: 93.12
+  - Tamaño del cluster: 171
+
+Cluster 2: Pokémon balanceados
+  - Promedio HP: 69.92
+  - Promedio Attack: 85.51
+  - Promedio Defense: 119.11
+  - Promedio Speed: 48.60
+  - Tamaño del cluster: 83
