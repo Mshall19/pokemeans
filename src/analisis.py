@@ -112,23 +112,19 @@ def graficar_mejores_generacion(df, ruta_salida):
     mejores = df_filtrado.loc[df_filtrado.groupby('Generation')['combate_score'].idxmax()]
     mejores_normales = mejores_generacion_normales(df)
 
-    # Primer gráfico: guardado
     plt.figure(figsize=(10, 6))
     plt.scatter(df_filtrado['Generation'], df_filtrado['combate_score'],
                 color='lightgray', alpha=0.5, label='Otros Pokémon')
 
-    # Colores para los mejores normales y absolutos
     colores_absolutos = plt.cm.viridis(mejores['Generation'] / mejores['Generation'].max())
     colores_normales = plt.cm.plasma(mejores_normales['Generation'] / mejores_normales['Generation'].max())
 
-    # Mejor por generación (sin legendarios)
     plt.scatter(mejores['Generation'], mejores['combate_score'],
                 color=colores_absolutos, label='Mejor por generación', s=100)
     for _, row in mejores.iterrows():
         plt.text(row['Generation'], row['combate_score'] + 2, row['Name'],
                  ha='center', fontsize=8, color='black', fontweight='bold')
 
-    # Mejor "normal" por generación (sin legendarios ni formas especiales)
     plt.scatter(mejores_normales['Generation'], mejores_normales['combate_score'],
                 color=colores_normales, marker='s', label='Mejor normal', s=80)
     for _, row in mejores_normales.iterrows():
@@ -144,7 +140,6 @@ def graficar_mejores_generacion(df, ruta_salida):
     plt.savefig(ruta_salida)
     plt.close()
 
-    # Segundo gráfico: para mostrar en pantalla
     plt.figure(figsize=(10, 6))
     plt.scatter(df_filtrado['Generation'], df_filtrado['combate_score'],
                 color='lightgray', alpha=0.5, label='Otros Pokémon')
