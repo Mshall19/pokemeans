@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import pandas as pd
 
 def calcular_peluche_score(df):
     df = df.copy()
@@ -22,6 +23,19 @@ def mejores_generacion(df):
     df = df[~df['Legendary']]
     mejores = df.loc[df.groupby('Generation')['combate_score'].idxmax()]
     return mejores[['Name', 'Generation', 'combate_score']]
+
+def mejores_generacion_normales(df):
+    mejores = []
+    for gen in sorted(df['Generation'].unique()):
+        sub = df[(df['Generation'] == gen) &
+                 (~df['Legendary']) &
+                 (~df['Name'].str.contains('Mega|X|Y|Alola|Galar|Hisui|Gigantamax', case=False))]
+
+        if not sub.empty:
+            mejor = sub.loc[sub['combate_score'].idxmax()]
+            mejores.append(mejor)
+
+    return pd.DataFrame(mejores)
 
 def graficar_pokemon_peluche(df, ruta_salida, top_n=10):
     df_peluches = df.sort_values(by=['peluche_score', 'combate_score'], ascending=[False, True])
@@ -96,19 +110,32 @@ def graficar_pokemon_utiles(df, ruta_salida, top_n=10):
 def graficar_mejores_generacion(df, ruta_salida):
     df_filtrado = df[~df['Legendary']]
     mejores = df_filtrado.loc[df_filtrado.groupby('Generation')['combate_score'].idxmax()]
+    mejores_normales = mejores_generacion_normales(df)
 
+    # Primer gráfico: guardado
     plt.figure(figsize=(10, 6))
     plt.scatter(df_filtrado['Generation'], df_filtrado['combate_score'],
                 color='lightgray', alpha=0.5, label='Otros Pokémon')
-    colores = plt.cm.viridis(mejores['Generation'] / mejores['Generation'].max())
+
+    # Colores para los mejores normales y absolutos
+    colores_absolutos = plt.cm.viridis(mejores['Generation'] / mejores['Generation'].max())
+    colores_normales = plt.cm.plasma(mejores_normales['Generation'] / mejores_normales['Generation'].max())
+
+    # Mejor por generación (sin legendarios)
     plt.scatter(mejores['Generation'], mejores['combate_score'],
-                color=colores, label='Mejor por generación', s=100)
+                color=colores_absolutos, label='Mejor por generación', s=100)
+    for _, row in mejores.iterrows():
+        plt.text(row['Generation'], row['combate_score'] + 2, row['Name'],
+                 ha='center', fontsize=8, color='black', fontweight='bold')
 
-    for i, row in mejores.iterrows():
-        plt.text(row['Generation'], row['combate_score'], row['Name'],
-                 ha='center', va='bottom', fontsize=9, fontweight='bold')
+    # Mejor "normal" por generación (sin legendarios ni formas especiales)
+    plt.scatter(mejores_normales['Generation'], mejores_normales['combate_score'],
+                color=colores_normales, marker='s', label='Mejor normal', s=80)
+    for _, row in mejores_normales.iterrows():
+        plt.text(row['Generation'], row['combate_score'] - 5, row['Name'],
+                 ha='center', fontsize=8, color='blue')
 
-    plt.title("Mejor Pokémon por generación (sin legendarios)")
+    plt.title("Mejor Pokémon por generación")
     plt.xlabel("Generación")
     plt.ylabel("Puntuación de combate")
     plt.legend()
@@ -117,23 +144,32 @@ def graficar_mejores_generacion(df, ruta_salida):
     plt.savefig(ruta_salida)
     plt.close()
 
+    # Segundo gráfico: para mostrar en pantalla
     plt.figure(figsize=(10, 6))
     plt.scatter(df_filtrado['Generation'], df_filtrado['combate_score'],
                 color='lightgray', alpha=0.5, label='Otros Pokémon')
+
     plt.scatter(mejores['Generation'], mejores['combate_score'],
-                color=colores, label='Mejor por generación', s=100)
+                color=colores_absolutos, label='Mejor por generación', s=100)
+    for _, row in mejores.iterrows():
+        plt.text(row['Generation'], row['combate_score'] + 2, row['Name'],
+                 ha='center', fontsize=8, color='black', fontweight='bold')
 
-    for i, row in mejores.iterrows():
-        plt.text(row['Generation'], row['combate_score'], row['Name'],
-                 ha='center', va='bottom', fontsize=9, fontweight='bold')
+    plt.scatter(mejores_normales['Generation'], mejores_normales['combate_score'],
+                color=colores_normales, marker='s', label='Mejor normal', s=80)
+    for _, row in mejores_normales.iterrows():
+        plt.text(row['Generation'], row['combate_score'] - 5, row['Name'],
+                 ha='center', fontsize=8, color='blue')
 
-    plt.title("Mejor Pokémon por generación (sin legendarios)")
+    plt.title("Mejor Pokémon por generación")
     plt.xlabel("Generación")
     plt.ylabel("Puntuación de combate")
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
     plt.show()
+
+
 
 def graficar_utiles_vs_peluches(df, ruta_salida, top_n=10):
     df = df.copy()
