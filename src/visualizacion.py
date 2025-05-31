@@ -5,7 +5,7 @@ def graficar_clusters(df, columnas, etiquetas, ruta="visuals/clusters.png"):
     """
     Dibuja un scatterplot de los clusters según dos columnas.
     """
-    col_x, col_y = columnas[1], columnas[2]  # attack y defense por defecto
+    col_x, col_y = columnas[1], columnas[2] 
     df['cluster'] = etiquetas
 
     plt.figure(figsize=(10, 6))

@@ -12,7 +12,6 @@ def resumen_clusters(datos, etiquetas, columnas):
     datos['cluster'] = etiquetas
     resumen = ""
     
-    # Descripciones custom
     descripciones = {
         0: "Pokémon rápidos y ofensivos",
         1: "Pokémon defensivos y lentos",
