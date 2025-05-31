@@ -1,19 +1,8 @@
 from src.utils import cargar_datos, limpiar_datos, seleccionar_caracteristicas, escalar_datos
 from src.modelo import entrenar_kmeans, resumen_clusters, graficar_clusters
-from src.analisis import calcular_peluche_score, calcular_combate_score, graficar_pokemon_peluche, graficar_pokemon_utiles, graficar_mejores_generacion, mejores_generacion
+from src.analisis import calcular_peluche_score, calcular_combate_score, graficar_pokemon_peluche, graficar_pokemon_utiles, graficar_mejores_generacion, mejores_generacion, graficar_utiles_vs_peluches, graficar_utiles_vs_peluches_3d
 
 import os
-
-def resumen_scores(df):
-    resumen = "\nAnálisis adicional de Scores:\n"
-    for score in ['peluche_score', 'combate_score']:
-        resumen += f"\n{score}:\n"
-        resumen += f"  - Promedio: {df[score].mean():.2f}\n"
-        resumen += f"  - Mediana: {df[score].median():.2f}\n"
-        resumen += f"  - Máximo: {df[score].max():.2f}\n"
-        resumen += f"  - Mínimo: {df[score].min():.2f}\n"
-        resumen += f"  - Desviación estándar: {df[score].std():.2f}\n"
-    return resumen
 
 def main():
     ruta_archivo = "data/pokemon.csv"
@@ -32,13 +21,17 @@ def main():
     datos_seleccionados = seleccionar_caracteristicas(datos_limpios, columnas)
     datos_escalados = escalar_datos(datos_seleccionados)
     datos_limpios = calcular_peluche_score(datos_limpios)
-    datos_limpios = calcular_combate_score(datos_limpios)
-
-    mejores_por_generacion = mejores_generacion(datos_limpios.copy())
-
     datos_limpios.to_csv('results/pokemon_scores.csv', index=False)
-
+    datos_limpios = calcular_combate_score(datos_limpios)
+    datos_limpios.to_csv('results/pokemon_scores.csv', index=False)
+    top_peluches = datos_limpios.sort_values(by=['peluche_score', 'combate_score'], ascending=[False, True]).head(10)
+    top_peluches.to_csv('results/top_peluches.csv', index=False)
+    top_utiles = datos_limpios.sort_values(by=['combate_score', 'peluche_score'], ascending=[False, True]).head(10)
+    top_utiles.to_csv('results/top_utiles.csv', index=False)
+    mejores = mejores_generacion(datos_limpios)
+    mejores.to_csv('results/mejores_por_generacion.csv', index=False)
     modelo, etiquetas = entrenar_kmeans(datos_escalados, num_clusters)
+    
 
     os.makedirs("results", exist_ok=True)
     os.makedirs("visuals", exist_ok=True)
@@ -53,10 +46,12 @@ def main():
 
     ruta_imagen = "visuals/clusters.png"
     graficar_clusters(datos_seleccionados.copy(), etiquetas, "Attack", "Defense", ruta_imagen)
-
     graficar_pokemon_peluche(datos_limpios.copy(), 'visuals/peluche_scatter.png')
     graficar_pokemon_utiles(datos_limpios.copy(), 'visuals/utilidad_scatter.png')
+    graficar_utiles_vs_peluches(datos_limpios.copy(), 'visuals/utiles_vs_peluches.png')
+    graficar_utiles_vs_peluches_3d(datos_limpios.copy(), 'visuals/utiles_vs_peluches_3d.png')
     graficar_mejores_generacion(datos_limpios.copy(), 'visuals/mejores_por_generacion.png')
+    
 
     print("Análisis completado.")
     print("Resumen guardado en: results/analysis_summary.txt")
