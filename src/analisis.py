@@ -18,6 +18,19 @@ def calcular_combate_score(df):
     df['combate_score'] = (df['HP']*0.2 + df['Attack']*0.4 + df['Defense']*0.2 + df['Speed']*0.2)
     return df
 
+def mejores_generacion(df):
+    # Implementación de la función
+    df = df.copy()
+    if 'combate_score' not in df.columns:
+        df = calcular_combate_score(df)  # calcular si no está
+
+    # Filtrar sin legendarios si quieres
+    df = df[~df['Legendary']]
+
+    mejores = df.loc[df.groupby('Generation')['combate_score'].idxmax()]
+    return mejores[['Name', 'Generation', 'combate_score']]
+
+
 import matplotlib.pyplot as plt
 
 def graficar_pokemon_peluche(df, ruta_salida, top_n=10):
@@ -95,3 +108,29 @@ def graficar_pokemon_utiles(df, ruta_salida, top_n=10):
     plt.grid(True)
     plt.tight_layout()
     plt.show()
+
+
+def graficar_mejores_generacion(df, ruta_salida):
+    # Filtrar legendarios
+    df = df[~df['Legendary']]
+    mejores = df.loc[df.groupby('Generation')['combate_score'].idxmax()]
+
+    plt.figure(figsize=(10, 6))
+    
+    # Scatter plot: Generación vs Combate Score
+    plt.scatter(mejores['Generation'], mejores['combate_score'], c=mejores['Generation'], cmap='viridis', s=100, edgecolors='black')
+
+    # Agregar etiquetas con el nombre del Pokémon sobre cada punto
+    for _, row in mejores.iterrows():
+        plt.text(row['Generation'], row['combate_score'] + 0.5, row['Name'], ha='center', fontsize=9)
+
+    plt.xlabel("Generación")
+    plt.ylabel("Puntuación de Combate")
+    plt.title("Mejor Pokémon por generación (sin legendarios)")
+    plt.grid(True)
+    plt.xticks(mejores['Generation'].unique())  # Para que se muestren solo generaciones existentes
+    plt.tight_layout()
+    
+    plt.savefig(ruta_salida)
+    plt.show()
+    plt.close()
