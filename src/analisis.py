@@ -2,9 +2,15 @@ import matplotlib.pyplot as plt
 
 def calcular_peluche_score(df):
     df = df.copy()
-    # Más HP y Defensa, penalizando velocidad (menos velocidad = más peluche)
-    df['peluche_score'] = df['HP'] + df['Defense'] + (1 / (df['Speed'] + 1)) * 50  # +1 para evitar división por 0
+    # Para que los Pokémon con stats bajos (HP, Defensa, Velocidad) obtengan un score alto:
+    # Usamos 1/(stat + 1) * 100 para cada stat.
+    df['peluche_score'] = (
+        (1 / (df['HP'] + 1)) * 100 +
+        (1 / (df['Defense'] + 1)) * 100 +
+        (1 / (df['Speed'] + 1)) * 100
+    )
     return df
+
 
 def calcular_combate_score(df):
     df = df.copy()
